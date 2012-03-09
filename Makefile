@@ -1,13 +1,14 @@
-#make ARCH=arm CROSS_COMPILE=arm-eabi-
+make ARCH=arm CROSS_COMPILE=arm-linux-
 
 obj-m += myregrw.o
 
 #KERNELDIR := /lib/modules/$(shell uname -r)/build
-KERNELDIR :=  /work/Android_data/kernel-2.6.29/
+KERNELDIR := ~/esd/linux-2.6.29/
+
 default:
 	make -C $(KERNELDIR) M=$(shell pwd) modules
 	#gcc -Wall tt-myregrw.c parse_conf.c record_content.c
-	arm_v5t_le-gcc -static -Wall tt-myregrw.c parse_conf.c record_content.c -o myregrw
+	gcc -static -Wall tt-myregrw.c parse_conf.c record_content.c -o myregrw
 
 install:
 	insmod register_char.ko	
