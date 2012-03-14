@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/ioctl.h>		/* ioctl */
 #include <errno.h>
+#include <signal.h>
 
 #include "myregrw.h"
 #include "phy_addr.h"
@@ -17,6 +18,15 @@
 
 extern int query_lines(const char *filename);
 extern int parse_config(const char *filename, struct config_info *p_config_info, int mode);
+
+static int done = 0;
+
+void cleanup(int signum)
+{
+  printf("Received signal %d, cleaning up...", signum);
+  done++;
+  return;
+}
 
 void __record_contend(const char *filename, unsigned long reg_info[])
 {
@@ -41,7 +51,7 @@ void __record_contend(const char *filename, unsigned long reg_info[])
 
 }
 
-void record_contend(const char *config_fp, const char *content_fp, int mode)
+void record_contend(const char *config_fp, const char *content_fp, int mode, int forever)
 {
 	int fd;
 	int num;
@@ -54,6 +64,9 @@ void record_contend(const char *config_fp, const char *content_fp, int mode)
 	unsigned long reg_info[2] ={0};
 
 	struct config_info *p_config_info, *p_config_info_bat;
+
+  //Register ctrl-c handler
+  signal(SIGINT, cleanup);
 
 	fd = open(DEVICE_NAME, O_RDWR);
 	if(fd < 0)
@@ -74,14 +87,21 @@ void record_contend(const char *config_fp, const char *content_fp, int mode)
 	p_config_info_bat = p_config_info;
 	//printf("address of p_config_info = %p, sizeof(struct config_info)=%d\n", p_config_info, sizeof(struct config_info));
 	parse_config(config_fp, p_config_info, mode);
-	for(i=0; i<num; i++) {
-		for(j=0; j<p_config_info->count; j++) {
+	for(i=0; (i<num || forever) && (done == 0); i++) {
+    //If we're looping forever, loop back to the beginning of the registers to read
+    if(i%num== 0) {
+      p_config_info = p_config_info_bat;
+    }
+
+		for(j=0; (j<p_config_info->count) && (done == 0) ; j++) {
 			if (p_config_info->base_addr%4 == 0) {
-				reg_info[0] = p_config_info->base_addr + j*4;
+//				reg_info[0] = p_config_info->base_addr + j*4;
+				reg_info[0] = p_config_info->base_addr;
+
 			} else {
 				printf("The base address must be aligned with 4\n");
 			}
-			//printf("addr = %lx\n", reg_info[0]);
+//			printf("addr = %lx\n", reg_info[0]);
 			if (0 == mode)
 				ret_val = ioctl(fd, MYREGRW_WRITE, reg_info);
 			else
