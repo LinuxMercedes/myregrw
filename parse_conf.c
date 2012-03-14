@@ -119,7 +119,7 @@ int parse_config(const char *filename, struct config_info *p_config_info, int mo
 		p_config_info->count = 3;
 		p_config_info->val= 5;
 #endif
-#if 0
+#if 0 
 		printf("base_addr = %lx, count=%d", p_config_info->base_addr, p_config_info->count);
 		if(mode == 0)
 			printf("\tval=%ld\n", p_config_info->val);
