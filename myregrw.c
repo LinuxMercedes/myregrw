@@ -139,7 +139,7 @@ static ssize_t myregrw_write(struct file *file, const char __user *buf, size_t l
 
 
 /* display controller register I/O routines */
-#ifdef  EVB_IM9815
+/*#ifdef  EVB_IM9815
 static __inline__ unsigned long read_reg(u32 phy_addr)
 {
 	return (ioread32(IO_ADDRESS(phy_addr)));
@@ -149,17 +149,27 @@ static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
 	iowrite32(val, IO_ADDRESS(phy_addr));
 	return (val);
 }
-#else
+#else*/
 static __inline__ unsigned long read_reg(u32 phy_addr)
 {
-	return (ioread32((void __iomem *)phy_addr));
+	void __iomem* base_addr;
+	base_addr = ioremap(phy_addr, 0x04);
+	
+	if(base_addr == NULL)
+	{
+		printk(KERN_ERR "Failed to remap register block\n");
+		return -ENOMEM;
+	}
+
+	return *(volatile unsigned long*) base_addr;
 }
+
 static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
 {
 	iowrite32(val, (void __iomem *)phy_addr);
 	return (val);
 }
-#endif
+//#endif
 
 
 
@@ -239,7 +249,7 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 #endif
 
 	case MYREGRW_READ: /* eXchange: use arg as pointer */		
-		printk("\nPhysical address:\n");
+		printk("\nRead Physical address:\n");
 		printk("-----------------\n");
 		retval = __get_user(reg_info[0], (unsigned long __user *)arg);
 		if (retval == 0) {
