@@ -1,0 +1,18 @@
+Copy myregrw and myregrw.ko somewhere (e.g. /myregrw). 
+
+In that folder, run
+insmod myregrw.ko
+
+It will say:
+I was assigned major number #number#.
+
+Type:
+mknod ./regrw c #number# 0
+
+Create a read control file, which should contain a line in the format
+0x<address to read> 1
+
+Then, you can run
+./myregrw <read control file> <data file> read
+
+When you're done collecting data, press CTRL-c
