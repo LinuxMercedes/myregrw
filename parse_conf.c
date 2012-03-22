@@ -39,26 +39,17 @@ int query_lines(const char *filename)
 			line[n - 1] = '\0';
 
 		/* Because the file format does not know any form of quoting we
-		   can search forward for the next ';' character and if found
+		   can search forward for the next '#' character and if found
 		   make it terminating the line.  */
 		strchrnull (line, '#');
 
 		/* If the line is blank it is ignored.  */
 		if (line[0] == '\0' || line[0] == '\r'){
-			//printf("num = %d\n", num);
 			continue;
 		}
 
 		num++;
 		
-		
-		#if 0
-		//printf("\\n = %d\n", '\n');
-		//printf("\\r = %d\n", '\r');
-	
-		//printf("line[0]=%d/%c\n", line[0],line[0]);
-		//printf("num[%d] n[%d]: %s\n", num, n, line);
-		#endif
 	}
 
 	if (line)
@@ -89,7 +80,7 @@ int parse_config(const char *filename, struct config_info *p_config_info, int mo
 			line[n - 1] = '\0';
 
 		/* Because the file format does not know any form of quoting we
-		   can search forward for the next ';' character and if found
+		   can search forward for the next '#' character and if found
 		   make it terminating the line.  */
 		strchrnull (line, '#');
 
@@ -111,7 +102,7 @@ int parse_config(const char *filename, struct config_info *p_config_info, int mo
 #if 1
 		p_config_info->base_addr = strtoul(base_addr, NULL, 16);
 		p_config_info->count = strtoul(count, NULL, 10);
-		if(mode == 0)
+		if(mode == 0) // writing
 			p_config_info->val= strtoul(val, NULL, 16);
 #else
 
@@ -125,7 +116,6 @@ int parse_config(const char *filename, struct config_info *p_config_info, int mo
 			printf("\tval=%ld\n", p_config_info->val);
 #endif		
 		p_config_info++;
-		//printf("address of p_config_info = %p\n", p_config_info);
 
 	}
 

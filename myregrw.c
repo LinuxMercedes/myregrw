@@ -137,19 +137,6 @@ static ssize_t myregrw_write(struct file *file, const char __user *buf, size_t l
 	return -EINVAL; 
 }
 
-
-/* display controller register I/O routines */
-/*#ifdef  EVB_IM9815
-static __inline__ unsigned long read_reg(u32 phy_addr)
-{
-	return (ioread32(IO_ADDRESS(phy_addr)));
-}
-static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
-{
-	iowrite32(val, IO_ADDRESS(phy_addr));
-	return (val);
-}
-#else*/
 static __inline__ unsigned long read_reg(u32 phy_addr)
 {
 	void __iomem* base_addr;
@@ -169,7 +156,6 @@ static __inline__ unsigned long write_reg(u32 phy_addr, u32 val)
 	iowrite32(val, (void __iomem *)phy_addr);
 	return (val);
 }
-//#endif
 
 
 
@@ -253,14 +239,11 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 		printk("-----------------\n");
 		retval = __get_user(reg_info[0], (unsigned long __user *)arg);
 		if (retval == 0) {
-			//printk("reg_info[0] = %lx\n", reg_info[0]);
 			printk("PHY ADDR = 0x%lx\n", reg_info[0]);
 		}
 		
 		printk("\n");
 
-		printk("Return the content of the PHY ADDR into userspace .\n");
-		printk("--------------------------------------------------\n");
 		tmp_val = read_reg(reg_info[0]);
 		retval = __put_user(tmp_val, (unsigned long __user *)arg+1);
 		if (retval == 0) {

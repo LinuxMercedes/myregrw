@@ -101,7 +101,6 @@ void record_contend(const char *config_fp, const char *content_fp, int mode, int
 			} else {
 				printf("The base address must be aligned with 4\n");
 			}
-//			printf("addr = %lx\n", reg_info[0]);
 			if (0 == mode)
 				ret_val = ioctl(fd, MYREGRW_WRITE, reg_info);
 			else
@@ -110,12 +109,10 @@ void record_contend(const char *config_fp, const char *content_fp, int mode, int
 				printf("ioctl put and get msg failed : %d\n", ret_val);
 			} else {
 				//printf("addr = %lx,\tvalue = %lx\n", reg_info[0], reg_info[1]);
-				//record_contend(CONTENT_FILE, reg_info);
 				__record_contend(content_fp, reg_info);
 			}
 		}
 		p_config_info++;
-		//printf("----------------------------------------------\n");
 	}	
 
 	if(p_config_info_bat)
