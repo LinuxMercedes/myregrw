@@ -33,9 +33,8 @@ int main(int argc, char *argv[])
   else {
     record_contend(config_fp, content_fp, mode, 1);
   }
+
 	return 0;
-
-
 }
 
 

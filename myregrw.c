@@ -234,16 +234,14 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
 		break;
 #endif
 
-	case MYREGRW_READ: /* eXchange: use arg as pointer */		
-		printk("\nRead Physical address:\n");
-		printk("-----------------\n");
+	case MYREGRW_READ: 		
+    /* Get the register address to read */
 		retval = __get_user(reg_info[0], (unsigned long __user *)arg);
-		if (retval == 0) {
-			printk("PHY ADDR = 0x%lx\n", reg_info[0]);
+		if (retval != 0) {
+      printk("Error reading register!");
 		}
 		
-		printk("\n");
-
+    /* Read the value and return it to userspace */
 		tmp_val = read_reg(reg_info[0]);
 		retval = __put_user(tmp_val, (unsigned long __user *)arg+1);
 		if (retval == 0) {
