@@ -14,6 +14,15 @@ default:
 	-cp myregrw /var/lib/tftpboot/
 	-cp myregrw.ko /var/lib/tftpboot/
 
+package: default
+	mkdir -p regrw
+	cp myregrw regrw/
+	cp myregrw.ko regrw/
+	cp use.txt regrw/
+	-rm myregrw.zip
+	zip myregrw.zip regrw/*
+	-rm -r regrw/
+
 install:
 	insmod register_char.ko	
 uninstall:
