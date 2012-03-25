@@ -19,44 +19,38 @@
 extern int query_lines(const char *filename);
 extern int parse_config(const char *filename, struct config_info *p_config_info, int mode);
 
+/* SIGINT (ctrl-c) handler */
 static int done = 0;
 
 void cleanup(int signum)
 {
-  printf("Received signal %d, cleaning up...", signum);
+  printf("Received signal %d, cleaning up...\n", signum);
   done++;
   return;
 }
 
-void __record_contend(const char *filename, unsigned long reg_info[])
+void __record_contend(FILE *fp, unsigned long reg_info[])
 {
-	FILE *fp;
 	int ret=0;
 	char buf[LEN]={0};
 
-	fp = fopen(filename, "a+");
-	if (fp == NULL) {
-		printf("Cannot open configuration file %s\n", filename);
-		exit(-1);
-	}
-	
 	sprintf(buf, "%lx\t\t%-lx\n", reg_info[0], reg_info[1]);
 		
 	ret = fwrite(buf, strlen(buf), 1, fp);
-	//printf("ret = %d\n", ret);
+
 	if(ret != 1)
 		printf("Error in recording the contents of registers!\n");
-
-	fclose(fp);
-
 }
 
 void record_contend(const char *config_fp, const char *content_fp, int mode, int forever)
 {
 	int fd;
 	int num;
-	int i, j;
+	unsigned int i, j;
 	int ret_val;
+
+	FILE *fp;
+
 	/*
 	 * reg_info[0] : register address
 	 * reg_info[1] : register data  tobe write to the address 
@@ -85,19 +79,29 @@ void record_contend(const char *config_fp, const char *content_fp, int mode, int
 		exit(1);
 	}
 	p_config_info_bat = p_config_info;
-	//printf("address of p_config_info = %p, sizeof(struct config_info)=%d\n", p_config_info, sizeof(struct config_info));
+
+  //Read the config
 	parse_config(config_fp, p_config_info, mode);
-	for(i=0; (i<num || forever) && (done == 0); i++) {
+
+  // Open the file for the register data in append mode
+	fp = fopen(content_fp, "a+");
+	if (fp == NULL) {
+		printf("Cannot open configuration file %s\n", content_fp);
+		exit(-1);
+	}
+  
+  //Read the registers listed num times or forever
+  for(i=0; (i<num || forever) && (!done); i++) {
     //If we're looping forever, loop back to the beginning of the registers to read
     if(i%num== 0) {
       p_config_info = p_config_info_bat;
+      i = 0; /* Prevent integer overflow */
     }
 
-		for(j=0; (j<p_config_info->count) && (done == 0) ; j++) {
+    //Read each register
+		for(j=0; (j<p_config_info->count) && (!done) ; j++) {
 			if (p_config_info->base_addr%4 == 0) {
-//				reg_info[0] = p_config_info->base_addr + j*4;
 				reg_info[0] = p_config_info->base_addr;
-
 			} else {
 				printf("The base address must be aligned with 4\n");
 			}
@@ -109,7 +113,7 @@ void record_contend(const char *config_fp, const char *content_fp, int mode, int
 				printf("ioctl put and get msg failed : %d\n", ret_val);
 			} else {
 				//printf("addr = %lx,\tvalue = %lx\n", reg_info[0], reg_info[1]);
-				__record_contend(content_fp, reg_info);
+				__record_contend(fp, reg_info);
 			}
 		}
 		p_config_info++;
@@ -118,8 +122,6 @@ void record_contend(const char *config_fp, const char *content_fp, int mode, int
 	if(p_config_info_bat)
 		free(p_config_info_bat);
 	
-	//	sleep(10);   //used to test multiple open to the device.
+	fclose(fp);
 	close(fd);
-
-
 }

@@ -10,7 +10,7 @@ CROSS_COMPILE := /home/nathan/esd/bin/arm-none-linux-gnueabi-
 default:
 	make -C $(KERNELDIR) O="/home/nathan/esd/linux/built_kernel" M=$(shell pwd) modules
 	#gcc -Wall tt-myregrw.c parse_conf.c record_content.c
-	$(CROSS_COMPILE)gcc -march=armv4t -static -g -Wall tt-myregrw.c parse_conf.c record_content.c -o myregrw
+	$(CROSS_COMPILE)gcc -march=armv4t -static -Wall tt-myregrw.c parse_conf.c record_content.c -o myregrw
 	-cp myregrw /var/lib/tftpboot/
 	-cp myregrw.ko /var/lib/tftpboot/
 
