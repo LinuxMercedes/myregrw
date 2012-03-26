@@ -6,11 +6,20 @@ obj-m += myregrw.o
 KERNELDIR := ~/esd/linux/linux-2.6.29/
 
 CROSS_COMPILE := /home/nathan/esd/bin/arm-none-linux-gnueabi-
+EXTRA_CFLAGS := -march=armv4t -static -Wall
+RELFLAGS := -O3
+DBGFLAGS := -g
 
 default:
 	make -C $(KERNELDIR) O="/home/nathan/esd/linux/built_kernel" M=$(shell pwd) modules
 	#gcc -Wall tt-myregrw.c parse_conf.c record_content.c
-	$(CROSS_COMPILE)gcc -march=armv4t -static -Wall tt-myregrw.c parse_conf.c record_content.c -o myregrw
+	$(CROSS_COMPILE)gcc $(EXTRA_CFLAGS) $(RELFLAGS) tt-myregrw.c parse_conf.c record_content.c -o myregrw
+	-cp myregrw /var/lib/tftpboot/
+	-cp myregrw.ko /var/lib/tftpboot/
+
+debug:
+	make -C $(KERNELDIR) O="/home/nathan/esd/linux/built_kernel" M=$(shell pwd) modules
+	$(CROSS_COMPILE)gcc $(EXTRA_CFLAGS) $(DBGFLAGS) tt-myregrw.c parse_conf.c record_content.c -o myregrw
 	-cp myregrw /var/lib/tftpboot/
 	-cp myregrw.ko /var/lib/tftpboot/
 
