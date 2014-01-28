@@ -244,10 +244,10 @@ static int myregrw_ioctl(struct inode *inode, struct file *filp, unsigned int cm
     /* Read the value and return it to userspace */
 		tmp_val = read_reg(reg_info[0]);
 		retval = __put_user(tmp_val, (unsigned long __user *)arg+1);
-		if (retval == 0) {
+/*		if (retval == 0) {
 			printk("Content of PHY ADDR 0x%lx = 0x%lx\n", reg_info[0], tmp_val);
 		}
-	
+*/	
 		break;
 
 	default:  /* redundant, as cmd was checked against MAXNR */
